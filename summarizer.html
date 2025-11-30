@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer - LuminaPDF</title>
+    <meta name="description" content="Summarize long text using AI.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">LuminaPDF</div>
+    </div>
+
+    <header class="glass">
+        <a href="index.html" class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6366f1" />
+                        <stop offset="100%" style="stop-color:#ec4899" />
+                    </linearGradient>
+                </defs>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+                <circle cx="12" cy="13" r="1" fill="#ec4899" stroke="none" style="opacity:0.8">
+                    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+                </circle>
+            </svg>
+            LuminaPDF
+        </a>
+        <nav class="nav-links">
+            <a href="index.html#pdf-tools">PDF Tools</a>
+            <a href="index.html#ai-tools">AI Tools</a>
+            <a href="index.html" class="nav-btn">Get Started</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="tool-container glass">
+            <h1>Text Summarizer</h1>
+            <p>Condense long articles into short summaries.</p>
+            
+            <div class="input-group">
+                <label for="summaryInput">Original Text</label>
+                <textarea id="summaryInput" rows="8" placeholder="Paste your long text here..." style="width: 100%; padding: 1rem; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: var(--radius); color: white;"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="summaryLength">Summary Length</label>
+                <input type="range" id="summaryLength" min="1" max="5" value="3">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    <span>Short</span>
+                    <span>Medium</span>
+                    <span>Long</span>
+                </div>
+            </div>
+
+            <button onclick="summarizeText()" class="btn btn-primary">Summarize</button>
+            
+            <div id="status"></div>
+
+            <div class="input-group" id="resultContainer" style="display: none; margin-top: 2rem;">
+                <label for="summaryOutput">Summary</label>
+                <div id="summaryOutput" style="text-align: left; padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: var(--radius); border: 1px solid var(--glass-border); line-height: 1.8;"></div>
+                <button onclick="copyText('summaryOutput')" class="btn btn-secondary mt-4">Copy Summary</button>
+            </div>
+
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <a href="index.html" class="logo">LuminaPDF</a>
+                <p>Premium, secure, and 100% client-side PDF and AI tools.</p>
+            </div>
+            <div class="footer-col">
+                <h4>PDF Tools</h4>
+                <ul>
+                    <li><a href="merge.html">Merge PDF</a></li>
+                    <li><a href="split.html">Split PDF</a></li>
+                    <li><a href="image-to-pdf.html">Image to PDF</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>AI Tools</h4>
+                <ul>
+                    <li><a href="ocr.html">OCR</a></li>
+                    <li><a href="summarizer.html">Summarizer</a></li>
+                    <li><a href="grammar-checker.html">Grammar</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LuminaPDF. Crafted with care.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/compromise@14.10.0/builds/compromise.min.js"></script>
+    <script src="tools.js?v=2"></script>
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => { loader.classList.add('hidden'); }, 500);
+        });
+        
+        // Helper for copy button since div isn't an input
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Copied to clipboard!', 'success');
+            }).catch(err => {
+                showStatus('Failed to copy.', 'error');
+            });
+        }
+    </script>
+</body>
+</html>

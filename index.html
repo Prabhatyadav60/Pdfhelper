@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaPDF - Intelligent Document Suite</title>
+    <meta name="description" content="Premium AI-powered PDF tools. Merge, split, edit, and analyze documents with LuminaPDF.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- RESET & BASE VARIABLES --- */
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --bg-dark: #0f172a;
+            --text-light: #f8fafc;
+            --text-gray: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- UTILITIES --- */
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- LOADER --- */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- NAVIGATION --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s ease;
+        }
+        header.scrolled { padding: 0.8rem 5%; background: rgba(15, 23, 42, 0.9); border-bottom: 1px solid var(--glass-border); }
+
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px;
+        }
+
+        /* Desktop Nav */
+        .nav-links { display: flex; align-items: center; gap: 2rem; }
+        .nav-links a:not(.nav-btn):hover { color: var(--primary); }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.6rem 1.5rem; border-radius: 99px; font-weight: 600; font-size: 0.9rem;
+        }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+
+        /* Mobile Menu Button */
+        .mobile-toggle { display: none; cursor: pointer; color: white; }
+
+        /* --- HERO SECTION --- */
+        .hero-section {
+            min-height: 100vh; padding: 8rem 5% 4rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+            position: relative; overflow: hidden;
+        }
+        /* Background gradient blob */
+        .hero-section::before {
+            content: ''; position: absolute; top: -20%; right: -10%;
+            width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+            border-radius: 50%; filter: blur(80px); z-index: -1;
+        }
+
+        .hero-content { flex: 1; max-width: 600px; }
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem); /* Responsive Font */
+            line-height: 1.1; margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-content p { font-size: 1.1rem; color: var(--text-gray); margin-bottom: 2.5rem; }
+        
+        .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.8rem 2rem; border-radius: 8px; font-weight: 600; text-align: center;
+        }
+        .btn-primary { background: white; color: var(--bg-dark); }
+        .btn-secondary { border: 1px solid var(--glass-border); color: white; }
+        .btn:hover { transform: translateY(-2px); }
+
+        .hero-image { flex: 1; display: flex; justify-content: center; }
+        .floating-img {
+            max-width: 100%; width: 500px; height: auto;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* --- TOOLS GRID --- */
+        .tools-section { padding: 4rem 5%; }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        
+        .tool-grid {
+            display: grid;
+            /* Auto-fit magic for responsiveness */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            padding: 2rem; border-radius: var(--card-radius);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: flex-start;
+        }
+        .tool-card:hover:not(.inactive) {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        /* Mouse Spotlight Effect Logic via JS */
+        .tool-card::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
+        }
+        .tool-card:hover::before { opacity: 1; }
+
+        .icon-wrapper {
+            margin-bottom: 1.5rem; padding: 12px;
+            background: rgba(255, 255, 255, 0.05); border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .icon-wrapper img, .icon-wrapper svg { width: 32px; height: 32px; }
+
+        .tool-card h3 { margin-bottom: 0.5rem; font-size: 1.25rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;}
+        .tool-card p { color: var(--text-gray); font-size: 0.95rem; line-height: 1.5; }
+
+        /* --- PREMIUM INACTIVE STATE & BADGE --- */
+        .tool-card.inactive {
+            opacity: 0.65; pointer-events: none; cursor: not-allowed;
+            filter: saturate(0.5); background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .badge-soon {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            color: #e2e8f0; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        .badge-soon::before {
+            content: ''; width: 6px; height: 6px; background-color: #f59e0b;
+            border-radius: 50%; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+        }
+        .badge-live {
+            background: rgba(16, 185, 129, 0.2); color: #34d399; 
+            padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* --- FOOTER --- */
+        .main-footer {
+            margin-top: 4rem; padding: 4rem 5% 2rem; border-top: 1px solid var(--glass-border);
+            background: linear-gradient(to top, #020617, transparent);
+        }
+        .footer-content {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; margin-bottom: 3rem;
+        }
+        .footer-col h4 { margin-bottom: 1.5rem; color: white; }
+        .footer-col ul li { margin-bottom: 0.8rem; }
+        .footer-col ul li a { color: var(--text-gray); font-size: 0.9rem; }
+        .footer-col ul li a:hover { color: var(--primary); }
+        .footer-bottom {
+            text-align: center; color: var(--text-gray); font-size: 0.85rem; padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 1024px) {
+            .hero-section { flex-direction: column; text-align: center; padding-top: 7rem; }
+            .hero-content { margin: 0 auto; }
+            .hero-actions { justify-content: center; }
+            .hero-image { margin-top: 3rem; }
+        }
+
+        @media (max-width: 768px) {
+            /* Navigation Mobile */
+            .mobile-toggle { display: block; z-index: 1001; }
+            .nav-links {
+                position: fixed; top: 0; right: 0; height: 100vh; width: 70%; max-width: 300px;
+                background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+                flex-direction: column; align-items: flex-start; padding: 6rem 2rem;
+                transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                border-left: 1px solid var(--glass-border);
+            }
+            .nav-links.active { transform: translateX(0); }
+            
+            /* Footer Responsive */
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .footer-col { margin-bottom: 1rem; }
+            .logo { justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 { font-size: 2.2rem; }
+            .btn { width: 100%; } /* Full width buttons on mobile */
+            .tool-grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">LuminaPDF</div>
+    </div>
+
+    <header class="glass">
+        <a href="index.html" class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6366f1" />
+                        <stop offset="100%" style="stop-color:#ec4899" />
+                    </linearGradient>
+                </defs>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            LuminaPDF
+        </a>
+        
+        <div class="mobile-toggle" id="mobile-toggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </div>
+
+        <nav class="nav-links" id="nav-links">
+            <a href="#pdf-tools" onclick="closeMenu()">PDF Tools</a>
+            <a href="#ai-tools" onclick="closeMenu()">AI Tools</a>
+            <a href="#" class="nav-btn">Get Started</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Intelligent tools for<br>smarter documents.</h1>
+                <p>
+                    Experience the next generation of document processing. <br>
+                    Secure, private, and powered by client-side AI.
+                </p>
+                <div class="hero-actions">
+                    <a href="#ai-tools" class="btn btn-primary">Try AI Tools</a>
+                    <a href="#pdf-tools" class="btn btn-secondary">Manage PDFs</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="assets/hero.png" alt="LuminaPDF Abstract Art" class="floating-img" onerror="this.style.display='none'">
+                </div>
+        </section>
+        
+        <section id="pdf-tools" class="tools-section">
+            <div class="section-header">
+                <h2 class="section-title">PDF Tools</h2>
+            </div>
+            <div class="tool-grid">
+                <a href="watermark.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <img src="assets/icon_watermark.png" alt="Icon" onerror="this.style.display='none'"> 
+                    </div>
+                    <h3>Watermark PDF</h3>
+                    <p>Add professional text watermarks to your documents with custom opacity and colors.</p>
+                </a>
+                <a href="merge.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <img src="assets/icon_merge.png" alt="Icon" onerror="this.style.display='none'">
+                    </div>
+                    <h3>Merge PDF</h3>
+                    <p>Seamlessly combine multiple PDF files into a single, organized document.</p>
+                </a>
+                <a href="split.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <img src="assets/icon_split.png" alt="Icon" onerror="this.style.display='none'">
+                    </div>
+                    <h3>Split PDF</h3>
+                    <p>Extract specific pages or split documents with precision and ease.</p>
+                </a>
+                <a href="image-to-pdf.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <img src="assets/icon_image_to_pdf.png" alt="Icon" onerror="this.style.display='none'">
+                    </div>
+                    <h3>Image to PDF</h3>
+                    <p>Transform your images into professional PDF documents instantly.</p>
+                </a>
+                <a href="pdf-to-image.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <img src="assets/icon_pdf_to_image.png" alt="Icon" onerror="this.style.display='none'">
+                    </div>
+                    <h3>PDF to Image</h3>
+                    <p>Convert PDF pages into high-quality, shareable images.</p>
+                </a>
+                <a href="remove-pages.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </div>
+                    <h3>Remove Pages</h3>
+                    <p>Quickly delete unwanted pages from your PDF documents.</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="ai-tools" class="tools-section">
+            <div class="section-header">
+                <h2 class="section-title">AI Tools <span class="badge-live">Beta</span></h2>
+            </div>
+            <div class="tool-grid">
+                
+                <a href="#" class="tool-card glass inactive">
+                    <div class="icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </div>
+                    <h3>Chat with PDF <span class="badge-soon">Coming Soon</span></h3>
+                    <p>Ask questions about your documents using Google Gemini AI.</p>
+                </a>
+
+                <a href="#" class="tool-card glass inactive">
+                    <div class="icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                    </div>
+                    <h3>LinkedIn Referral <span class="badge-soon">Coming Soon</span></h3>
+                    <p>Generate crisp connection requests and referral messages.</p>
+                </a>
+
+                <a href="#" class="tool-card glass inactive">
+                    <div class="icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <h3>Cold Email Writer <span class="badge-soon">Coming Soon</span></h3>
+                    <p>Write persuasive cold emails for jobs and networking.</p>
+                </a>
+
+                <a href="ocr.html" class="tool-card glass">
+                    <div class="icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                    </div>
+                    <h3>Image to Text <span class="badge-live">Live</span></h3>
+                    <p>Extract text from scanned documents and images instantly.</p>
+                </a>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <a href="index.html" class="logo">LuminaPDF</a>
+                <p>Premium, secure, and 100% client-side PDF and AI tools.</p>
+            </div>
+            <div class="footer-col">
+                <h4>PDF Tools</h4>
+                <ul>
+                    <li><a href="merge.html">Merge PDF</a></li>
+                    <li><a href="split.html">Split PDF</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>AI Tools</h4>
+                <ul>
+                    <li><a href="ocr.html">Image to Text</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LuminaPDF.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Loader
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => loader.classList.add('hidden'), 800);
+        });
+
+        // Header Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            header.classList.toggle('scrolled', window.scrollY > 10);
+        });
+
+        // Mobile Menu Logic
+        const toggle = document.getElementById('mobile-toggle');
+        const nav = document.getElementById('nav-links');
+        
+        toggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+        });
+
+        function closeMenu() {
+            nav.classList.remove('active');
+        }
+
+        // Card Spotlight Effect
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+        
+        // Intersection Observer for Animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.style.opacity = 0;
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

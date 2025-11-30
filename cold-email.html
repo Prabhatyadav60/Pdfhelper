@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Email Writer - LuminaPDF</title>
+    <meta name="description" content="Write persuasive cold emails for jobs, sales, or networking using AI.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">LuminaPDF</div>
+    </div>
+
+    <header class="glass">
+        <a href="index.html" class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6366f1" />
+                        <stop offset="100%" style="stop-color:#ec4899" />
+                    </linearGradient>
+                </defs>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+                <circle cx="12" cy="13" r="1" fill="#ec4899" stroke="none" style="opacity:0.8">
+                    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+                </circle>
+            </svg>
+            LuminaPDF
+        </a>
+        <nav class="nav-links">
+            <a href="index.html#pdf-tools">PDF Tools</a>
+            <a href="index.html#ai-tools">AI Tools</a>
+            <a href="index.html" class="nav-btn">Get Started</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="tool-container glass" style="max-width: 800px;">
+            <h1>Cold Email Writer <span class="badge">Gemini AI</span></h1>
+            <p>Generate high-converting cold emails for job applications or networking.</p>
+            
+            <div class="input-group">
+                <label for="apiKey">Gemini API Key</label>
+                <input type="password" id="apiKey" placeholder="Enter your Google Gemini API Key">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    Your key is used only locally. Get one <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary);">here</a>.
+                </p>
+            </div>
+
+            <div class="input-group">
+                <label for="recipientName">Recipient Name & Role</label>
+                <input type="text" id="recipientName" placeholder="e.g., Jane Smith, Hiring Manager">
+            </div>
+
+            <div class="input-group">
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName" placeholder="e.g., TechCorp Inc.">
+            </div>
+
+            <div class="input-group">
+                <label for="emailPurpose">Purpose / Goal</label>
+                <textarea id="emailPurpose" rows="3" placeholder="e.g., Applying for Senior Dev role, asking for a coffee chat..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Your Resume / Background (PDF)</label>
+                <div class="file-drop-area" id="dropArea" style="padding: 1.5rem;">
+                    <p>Drag & Drop resume here or</p>
+                    <input type="file" id="fileInput" accept=".pdf" hidden>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Select PDF</button>
+                    <div id="fileName" style="margin-top: 1rem; color: var(--text-muted);"></div>
+                </div>
+            </div>
+
+            <button onclick="generateColdEmail()" class="btn btn-primary" id="actionBtn" style="width: 100%; margin-top: 1rem;">Generate Email</button>
+            
+            <div id="status"></div>
+
+            <div id="resultContainer" class="result-container" style="display: none;">
+                <h3>Generated Email:</h3>
+                <textarea id="generatedEmail" rows="12" readonly></textarea>
+                <button onclick="copyText('generatedEmail')" class="btn btn-secondary" style="margin-top: 1rem;">Copy to Clipboard</button>
+            </div>
+
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <a href="index.html" class="logo">LuminaPDF</a>
+                <p>Premium, secure, and 100% client-side PDF and AI tools.</p>
+            </div>
+            <div class="footer-col">
+                <h4>PDF Tools</h4>
+                <ul>
+                    <li><a href="merge.html">Merge PDF</a></li>
+                    <li><a href="split.html">Split PDF</a></li>
+                    <li><a href="image-to-pdf.html">Image to PDF</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>AI Tools</h4>
+                <ul>
+                    <li><a href="chat-pdf.html">Chat with PDF</a></li>
+                    <li><a href="linkedin-referral.html">LinkedIn Generator</a></li>
+                    <li><a href="cold-email.html">Cold Email Writer</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LuminaPDF. Crafted with care.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <script src="tools.js?v=4"></script>
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => { loader.classList.add('hidden'); }, 500);
+        });
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if(this.files[0]) {
+                document.getElementById('fileName').textContent = this.files[0].name;
+                window.pdfTextContent = null; 
+            }
+        });
+    </script>
+</body>
+</html>
